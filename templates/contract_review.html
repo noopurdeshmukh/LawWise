@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+{% block title %}Contract Review — LawWise{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">Contract Review</h1>
+  <p class="page-subtitle">AI-powered contract analysis — identify risks, obligations, and key terms</p>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-5">
+    <!-- Input Panel -->
+    <div class="card-panel">
+      <div class="panel-header"><i class="bi bi-search"></i> Contract Input</div>
+
+      <!-- Select from uploaded docs -->
+      {% if documents %}
+      <div class="mb-3">
+        <label class="form-label small text-muted">Select an uploaded document</label>
+        <select class="form-select" id="docSelect" onchange="loadDocSelection()">
+          <option value="">— Choose a document —</option>
+          {% for doc in documents %}
+          <option value="{{ doc.id }}" data-name="{{ doc.original_filename }}">{{ doc.original_filename }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="or-divider">or</div>
+      {% endif %}
+
+      <!-- Paste text -->
+      <div class="mb-3">
+        <label class="form-label small text-muted">Paste contract text</label>
+        <textarea class="form-control" id="contractText" rows="12" placeholder="Paste your contract text here...&#10;&#10;e.g. This Agreement is entered into between..."></textarea>
+      </div>
+
+      <button class="btn-primary-action w-100" id="reviewBtn" onclick="reviewContract()">
+        <i class="bi bi-search"></i> Review Contract
+      </button>
+      <div class="mt-2 text-center small text-muted">Analysis may take 15–30 seconds</div>
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="disclaimer-card mt-3">
+      <i class="bi bi-info-circle"></i>
+      LawWise contract review identifies potential areas of concern. It does NOT provide legal advice. Never sign a contract without consulting a qualified lawyer for important matters.
+    </div>
+  </div>
+
+  <!-- Results Panel -->
+  <div class="col-lg-7">
+    <div id="reviewLoading" class="card-panel d-none">
+      <div class="panel-header"><i class="bi bi-cpu"></i> Processing</div>
+      <div class="loading-steps" id="reviewSteps">
+        <div class="agent-step done"><i class="bi bi-check-circle-fill"></i> Loading contract</div>
+        <div class="agent-step active"><i class="bi bi-arrow-repeat spin"></i> Contract Reviewer Agent analyzing...</div>
+      </div>
+    </div>
+
+    <div id="reviewResult" class="d-none">
+      <!-- Results injected by JS -->
+    </div>
+
+    <!-- Placeholder -->
+    <div id="reviewPlaceholder" class="card-panel">
+      <div class="empty-state">
+        <div class="empty-icon"><i class="bi bi-file-earmark-check"></i></div>
+        <h5>Contract Analysis</h5>
+        <p>Select a document or paste contract text to analyze potential risks, obligations, and important clauses.</p>
+        <div class="feature-pills">
+          <span class="pill">🔴 High Attention Clauses</span>
+          <span class="pill">🟠 Medium Attention Clauses</span>
+          <span class="pill">🟢 Low Attention Clauses</span>
+          <span class="pill">📋 Contract Summary</span>
+          <span class="pill">❓ Questions for Lawyer</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let selectedDocId = null;
+
+function loadDocSelection() {
+  const sel = document.getElementById('docSelect');
+  selectedDocId = sel.value || null;
+  if (selectedDocId) {
+    document.getElementById('contractText').value = '';
+    document.getElementById('contractText').placeholder = `Document "${sel.options[sel.selectedIndex].dataset.name}" selected. Analysis will use the full document.`;
+  }
+}
+
+async function reviewContract() {
+  const docText = document.getElementById('contractText').value.trim();
+  if (!selectedDocId && docText.length < 100) {
+    alert('Please select a document or paste at least 100 characters of contract text.');
+    return;
+  }
+
+  document.getElementById('reviewPlaceholder').classList.add('d-none');
+  document.getElementById('reviewResult').classList.add('d-none');
+  document.getElementById('reviewLoading').classList.remove('d-none');
+  document.getElementById('reviewBtn').disabled = true;
+
+  const payload = {};
+  if (selectedDocId) payload.document_id = parseInt(selectedDocId);
+  if (docText) payload.document_text = docText;
+
+  try {
+    const resp = await fetch('/contract-review', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const data = await resp.json();
+    document.getElementById('reviewLoading').classList.add('d-none');
+    document.getElementById('reviewResult').classList.remove('d-none');
+
+    if (data.error) {
+      document.getElementById('reviewResult').innerHTML = `<div class="card-panel"><div class="alert alert-danger">${escHtml(data.error)}</div></div>`;
+    } else if (data.raw_analysis) {
+      document.getElementById('reviewResult').innerHTML = `<div class="card-panel"><div class="panel-header"><i class="bi bi-file-earmark-check"></i> Contract Analysis</div><div class="analysis-text">${formatMarkdown(data.raw_analysis)}</div></div>`;
+    } else {
+      document.getElementById('reviewResult').innerHTML = renderContractReview(data);
+    }
+  } catch(e) {
+    document.getElementById('reviewLoading').classList.add('d-none');
+    document.getElementById('reviewResult').classList.remove('d-none');
+    document.getElementById('reviewResult').innerHTML = `<div class="card-panel"><div class="alert alert-danger">Review failed. Please try again.</div></div>`;
+  } finally {
+    document.getElementById('reviewBtn').disabled = false;
+  }
+}
+
+function renderContractReview(data) {
+  let html = '<div class="card-panel">';
+  html += `<div class="panel-header"><i class="bi bi-file-earmark-check"></i> Contract Review — ${escHtml(data.filename || 'Contract')}</div>`;
+
+  // Overview
+  if (data.contract_overview) {
+    html += `<div class="analysis-section"><h5>Overview</h5><p>${escHtml(data.contract_overview)}</p></div>`;
+  }
+
+  // Quick info grid
+  const infoFields = [
+    ['Main Purpose', data.main_purpose],
+    ['Payment Terms', data.payment_terms],
+    ['Termination', data.termination],
+    ['Governing Law', data.governing_law],
+    ['Dispute Resolution', data.dispute_resolution],
+  ];
+  const validFields = infoFields.filter(f => f[1]);
+  if (validFields.length) {
+    html += `<div class="analysis-section"><div class="info-grid">`;
+    validFields.forEach(([k, v]) => {
+      html += `<div class="info-cell"><div class="info-label">${escHtml(k)}</div><div class="info-val">${escHtml(v)}</div></div>`;
+    });
+    html += '</div></div>';
+  }
+
+  // Parties
+  if (data.parties && data.parties.length) {
+    html += `<div class="analysis-section"><h5>Parties</h5><div class="parties-list">`;
+    data.parties.forEach(p => { html += `<span class="party-tag"><i class="bi bi-person"></i> ${escHtml(typeof p === 'string' ? p : (p.name || JSON.stringify(p)))}</span>`; });
+    html += '</div></div>';
+  }
+
+  // Risk summary
+  if (data.risks && data.risks.length) {
+    const high = data.risks.filter(r => r.risk_level === 'high').length;
+    const med = data.risks.filter(r => r.risk_level === 'medium').length;
+    const low = data.risks.filter(r => r.risk_level === 'low').length;
+    html += `<div class="analysis-section"><h5>Risk Overview</h5>
+      <div class="risk-summary-row">
+        <div class="risk-count risk-high"><span class="rnum">${high}</span><span class="rlabel">🔴 High</span></div>
+        <div class="risk-count risk-medium"><span class="rnum">${med}</span><span class="rlabel">🟠 Medium</span></div>
+        <div class="risk-count risk-low"><span class="rnum">${low}</span><span class="rlabel">🟢 Low</span></div>
+      </div>
+    </div>`;
+
+    html += `<div class="analysis-section"><h5>Clause Analysis</h5>`;
+    data.risks.forEach((r, i) => {
+      const lvl = r.risk_level || 'low';
+      const icon = lvl === 'high' ? '🔴' : lvl === 'medium' ? '🟠' : '🟢';
+      html += `<div class="clause-card clause-${lvl}">
+        <div class="clause-header">
+          <span class="risk-indicator">${icon} <strong>${escHtml(r.clause || `Clause ${i+1}`)}</strong></span>
+          <span class="risk-badge risk-${lvl}">${lvl.toUpperCase()}</span>
+        </div>
+        ${r.explanation ? `<p class="clause-explain mt-2">${escHtml(r.explanation)}</p>` : ''}
+        ${r.why_it_matters ? `<div class="clause-detail"><strong>Why it matters:</strong> ${escHtml(r.why_it_matters)}</div>` : ''}
+        ${r.potential_concern ? `<div class="clause-detail text-warning-dark"><strong>Potential concern:</strong> ${escHtml(r.potential_concern)}</div>` : ''}
+        ${r.question_for_lawyer ? `<div class="clause-detail lawyer-q"><i class="bi bi-question-circle"></i> <em>Ask your lawyer: ${escHtml(r.question_for_lawyer)}</em></div>` : ''}
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  // Questions for lawyer
+  if (data.questions_for_lawyer && data.questions_for_lawyer.length) {
+    html += `<div class="analysis-section"><h5>❓ Questions to Ask Your Lawyer</h5><ol>`;
+    data.questions_for_lawyer.forEach(q => { html += `<li>${escHtml(q)}</li>`; });
+    html += '</ol></div>';
+  }
+
+  if (data.disclaimer) {
+    html += `<div class="disclaimer-card mt-3"><i class="bi bi-info-circle"></i> ${escHtml(data.disclaimer)}</div>`;
+  }
+
+  html += '</div>';
+  return html;
+}
+</script>
+{% endblock %}

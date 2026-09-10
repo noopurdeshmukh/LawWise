@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}Case Research — LawWise{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">Case Research</h1>
+  <p class="page-subtitle">Find relevant Indian court judgments and legal precedents from the knowledge base</p>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="card-panel">
+      <div class="panel-header"><i class="bi bi-balance-scale"></i> Research Query</div>
+      <div class="mb-3">
+        <label class="form-label small text-muted">What legal issue would you like to research?</label>
+        <textarea class="form-control" id="researchQuery" rows="5" placeholder="e.g. breach of contract remedies India&#10;consumer protection e-commerce&#10;tenant eviction notice period&#10;employer employee termination India"></textarea>
+      </div>
+      <div class="mb-3">
+        <label class="form-label small text-muted">Jurisdiction</label>
+        <select class="form-select" id="jurisdictionSelect">
+          <option value="India" selected>🇮🇳 India</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <button class="btn-primary-action w-100" id="researchBtn" onclick="doResearch()">
+        <i class="bi bi-search"></i> Research Cases
+      </button>
+    </div>
+
+    <div class="card-panel mt-3">
+      <div class="panel-header"><i class="bi bi-lightbulb"></i> Example Queries</div>
+      <div class="suggestion-list">
+        <button class="suggestion-item" onclick="setQuery('Breach of contract damages India')">Breach of contract damages</button>
+        <button class="suggestion-item" onclick="setQuery('Consumer protection online shopping India')">Consumer protection online shopping</button>
+        <button class="suggestion-item" onclick="setQuery('Employment termination wrongful dismissal India')">Employment termination</button>
+        <button class="suggestion-item" onclick="setQuery('Landlord tenant dispute India')">Landlord tenant dispute</button>
+        <button class="suggestion-item" onclick="setQuery('Cheque bounce Section 138 NI Act')">Cheque bounce Section 138</button>
+      </div>
+    </div>
+
+    <div class="disclaimer-card mt-3">
+      <i class="bi bi-info-circle"></i>
+      LawWise only shows cases found in the indexed knowledge base. Results are never fabricated. For professional case research, consult SCC Online, Manupatra, or Indian Kanoon.
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div id="researchLoading" class="card-panel d-none">
+      <div class="panel-header"><i class="bi bi-cpu"></i> Processing</div>
+      <div class="loading-steps">
+        <div class="agent-step done"><i class="bi bi-check-circle-fill"></i> Received query</div>
+        <div class="agent-step active"><i class="bi bi-arrow-repeat spin"></i> Case Research Agent searching...</div>
+      </div>
+    </div>
+
+    <div id="researchResult" class="d-none"></div>
+
+    <div id="researchPlaceholder" class="card-panel">
+      <div class="empty-state">
+        <div class="empty-icon"><i class="bi bi-balance-scale"></i></div>
+        <h5>Case Research</h5>
+        <p>Enter a legal issue to search for relevant Indian court judgments and precedents in the knowledge base.</p>
+        <div class="important-note">
+          <i class="bi bi-shield-exclamation"></i>
+          <strong>Important:</strong> LawWise never fabricates case names, citations, or legal holdings. Results come only from indexed documents.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function setQuery(text) {
+  document.getElementById('researchQuery').value = text;
+}
+
+async function doResearch() {
+  const query = document.getElementById('researchQuery').value.trim();
+  const jurisdiction = document.getElementById('jurisdictionSelect').value;
+
+  if (!query) { alert('Please enter a research query.'); return; }
+
+  document.getElementById('researchPlaceholder').classList.add('d-none');
+  document.getElementById('researchResult').classList.add('d-none');
+  document.getElementById('researchLoading').classList.remove('d-none');
+  document.getElementById('researchBtn').disabled = true;
+
+  try {
+    const resp = await fetch('/case-research', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({query, jurisdiction})
+    });
+    const data = await resp.json();
+    document.getElementById('researchLoading').classList.add('d-none');
+    document.getElementById('researchResult').classList.remove('d-none');
+
+    if (data.error) {
+      document.getElementById('researchResult').innerHTML = `<div class="card-panel"><div class="alert alert-danger">${escHtml(data.error)}</div></div>`;
+    } else {
+      document.getElementById('researchResult').innerHTML = renderCaseResult(data);
+    }
+  } catch(e) {
+    document.getElementById('researchLoading').classList.add('d-none');
+    document.getElementById('researchResult').classList.remove('d-none');
+    document.getElementById('researchResult').innerHTML = `<div class="card-panel"><div class="alert alert-danger">Research failed. Please try again.</div></div>`;
+  } finally {
+    document.getElementById('researchBtn').disabled = false;
+  }
+}
+
+function renderCaseResult(data) {
+  let html = '<div class="card-panel">';
+  html += `<div class="panel-header"><i class="bi bi-balance-scale"></i> Case Research Results</div>`;
+  html += `<div class="analysis-section">${formatMarkdown(data.answer || 'No results found.')}</div>`;
+
+  if (data.sources && data.sources.length) {
+    html += `<div class="analysis-section"><h5><i class="bi bi-journals"></i> Sources Used</h5>`;
+    data.sources.forEach(s => {
+      html += `<div class="source-card">
+        <div class="source-doc"><i class="bi bi-file-earmark-text"></i> ${escHtml(s.document)}</div>
+        ${s.section ? `<div class="source-detail">Section: ${escHtml(s.section)}</div>` : ''}
+        ${s.year ? `<div class="source-detail">Year: ${escHtml(String(s.year))}</div>` : ''}
+        <div class="source-type">${escHtml(s.source_type || 'Legal Document')} · ${escHtml(s.jurisdiction || 'India')}</div>
+        ${s.excerpt ? `<div class="source-excerpt">"${escHtml(s.excerpt.substring(0,250))}..."</div>` : ''}
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  if (data.disclaimer) {
+    html += `<div class="disclaimer-card mt-3"><i class="bi bi-info-circle"></i> ${escHtml(data.disclaimer)}</div>`;
+  }
+
+  html += '</div>';
+  return html;
+}
+</script>
+{% endblock %}

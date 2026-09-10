@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+{% block title %}Compliance Check — LawWise{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">Compliance Checker</h1>
+  <p class="page-subtitle">Compare your document or practice against retrieved legal requirements</p>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="card-panel">
+      <div class="panel-header"><i class="bi bi-check2-circle"></i> Compliance Input</div>
+
+      {% if documents %}
+      <div class="mb-3">
+        <label class="form-label small text-muted">Select document to check</label>
+        <select class="form-select" id="docSelect">
+          <option value="">— Choose a document (optional) —</option>
+          {% for doc in documents %}
+          <option value="{{ doc.id }}">{{ doc.original_filename }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      {% endif %}
+
+      <div class="mb-3">
+        <label class="form-label small text-muted">Or describe your business practice / policy</label>
+        <textarea class="form-control" id="businessDesc" rows="4" placeholder="e.g. Our app collects user emails and phone numbers without explicit consent..."></textarea>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label small text-muted">Paste document text (optional)</label>
+        <textarea class="form-control" id="docText" rows="6" placeholder="Paste your policy or document text here..."></textarea>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label small text-muted">Jurisdiction</label>
+        <select class="form-select" id="jurisdictionSelect">
+          <option value="India" selected>🇮🇳 India</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <button class="btn-primary-action w-100" id="checkBtn" onclick="checkCompliance()">
+        <i class="bi bi-check2-circle"></i> Check Compliance
+      </button>
+    </div>
+
+    <div class="disclaimer-card mt-3">
+      <i class="bi bi-info-circle"></i>
+      LawWise never certifies legal compliance. Results are based on retrieved sources and require professional verification.
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div id="checkLoading" class="card-panel d-none">
+      <div class="panel-header"><i class="bi bi-cpu"></i> Processing</div>
+      <div class="loading-steps">
+        <div class="agent-step done"><i class="bi bi-check-circle-fill"></i> Loading document</div>
+        <div class="agent-step active"><i class="bi bi-arrow-repeat spin"></i> Compliance Checker Agent analyzing...</div>
+      </div>
+    </div>
+
+    <div id="checkResult" class="d-none"></div>
+
+    <div id="checkPlaceholder" class="card-panel">
+      <div class="empty-state">
+        <div class="empty-icon"><i class="bi bi-clipboard-check"></i></div>
+        <h5>Compliance Analysis</h5>
+        <p>Provide a document or describe your practice to check against retrieved legal requirements.</p>
+        <div class="feature-pills">
+          <span class="pill">✅ Appears Aligned</span>
+          <span class="pill">⚠️ Needs Review</span>
+          <span class="pill">❌ Potential Issue</span>
+          <span class="pill">❓ Insufficient Info</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function checkCompliance() {
+  const docId = document.getElementById('docSelect') ? document.getElementById('docSelect').value : '';
+  const docText = document.getElementById('docText').value.trim();
+  const businessDesc = document.getElementById('businessDesc').value.trim();
+  const jurisdiction = document.getElementById('jurisdictionSelect').value;
+
+  if (!docId && !docText && !businessDesc) {
+    alert('Please provide a document, document text, or business description.');
+    return;
+  }
+
+  document.getElementById('checkPlaceholder').classList.add('d-none');
+  document.getElementById('checkResult').classList.add('d-none');
+  document.getElementById('checkLoading').classList.remove('d-none');
+  document.getElementById('checkBtn').disabled = true;
+
+  const payload = { jurisdiction, business_description: businessDesc };
+  if (docId) payload.document_id = parseInt(docId);
+  if (docText) payload.document_text = docText;
+
+  try {
+    const resp = await fetch('/compliance-check', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const data = await resp.json();
+    document.getElementById('checkLoading').classList.add('d-none');
+    document.getElementById('checkResult').classList.remove('d-none');
+
+    if (data.error) {
+      document.getElementById('checkResult').innerHTML = `<div class="card-panel"><div class="alert alert-danger">${escHtml(data.error)}</div></div>`;
+    } else if (data.raw_analysis) {
+      document.getElementById('checkResult').innerHTML = `<div class="card-panel"><div class="panel-header"><i class="bi bi-clipboard-check"></i> Compliance Analysis</div><div class="analysis-text">${formatMarkdown(data.raw_analysis)}</div></div>`;
+    } else {
+      document.getElementById('checkResult').innerHTML = renderComplianceResult(data);
+    }
+  } catch(e) {
+    document.getElementById('checkLoading').classList.add('d-none');
+    document.getElementById('checkResult').classList.remove('d-none');
+    document.getElementById('checkResult').innerHTML = `<div class="card-panel"><div class="alert alert-danger">Check failed. Please try again.</div></div>`;
+  } finally {
+    document.getElementById('checkBtn').disabled = false;
+  }
+}
+
+function getStatusIcon(status) {
+  const map = {
+    'aligned': '✅', 'needs_review': '⚠️', 'potential_issue': '❌', 'insufficient_info': '❓'
+  };
+  return map[status] || '❓';
+}
+
+function getStatusClass(status) {
+  const map = {
+    'aligned': 'status-aligned', 'needs_review': 'status-review',
+    'potential_issue': 'status-issue', 'insufficient_info': 'status-unknown'
+  };
+  return map[status] || 'status-unknown';
+}
+
+function renderComplianceResult(data) {
+  let html = '<div class="card-panel">';
+  html += `<div class="panel-header"><i class="bi bi-clipboard-check"></i> Compliance Analysis — ${escHtml(data.jurisdiction || 'India')}</div>`;
+
+  if (data.summary) {
+    html += `<div class="analysis-section"><p class="lead-text">${escHtml(data.summary)}</p></div>`;
+  }
+
+  if (data.checks && data.checks.length) {
+    html += `<div class="analysis-section"><h5>Compliance Checks</h5>
+      <div class="compliance-table-wrapper">
+      <table class="compliance-table">
+        <thead><tr><th>Status</th><th>Requirement</th><th>Current Situation</th><th>Source</th></tr></thead>
+        <tbody>`;
+    data.checks.forEach(c => {
+      const icon = getStatusIcon(c.status);
+      const cls = getStatusClass(c.status);
+      html += `<tr class="${cls}">
+        <td><span class="compliance-status">${icon}</span></td>
+        <td>${escHtml(c.requirement || '')}</td>
+        <td>${escHtml(c.current_situation || '')}<br><small class="text-muted">${escHtml(c.explanation || '')}</small></td>
+        <td><small>${escHtml(c.source || '')}</small></td>
+      </tr>`;
+    });
+    html += '</tbody></table></div></div>';
+  }
+
+  if (data.key_concerns && data.key_concerns.length) {
+    html += `<div class="analysis-section"><h5>⚠️ Key Concerns</h5><ul>`;
+    data.key_concerns.forEach(c => { html += `<li>${escHtml(c)}</li>`; });
+    html += '</ul></div>';
+  }
+
+  if (data.recommended_actions && data.recommended_actions.length) {
+    html += `<div class="analysis-section"><h5>Recommended Actions</h5><ol>`;
+    data.recommended_actions.forEach(a => { html += `<li>${escHtml(a)}</li>`; });
+    html += '</ol></div>';
+  }
+
+  if (data.overall_assessment) {
+    html += `<div class="assessment-box"><strong>Overall Assessment:</strong> ${escHtml(data.overall_assessment)}</div>`;
+  }
+
+  if (data.disclaimer) {
+    html += `<div class="disclaimer-card mt-3"><i class="bi bi-info-circle"></i> ${escHtml(data.disclaimer)}</div>`;
+  }
+
+  html += '</div>';
+  return html;
+}
+</script>
+{% endblock %}

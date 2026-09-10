@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}{{ code }} Error — LawWise{% endblock %}
+{% block content %}
+<div style="display:flex; align-items:center; justify-content:center; min-height:60vh;">
+  <div class="text-center">
+    <div style="font-size:5rem; color:#c9a84c; margin-bottom:1rem;">⚖</div>
+    <h1 style="font-size:4rem; font-weight:800; color:#0f2044;">{{ code }}</h1>
+    <p style="color:#57606a; font-size:1.1rem; margin-bottom:2rem;">{{ message }}</p>
+    <a href="{{ url_for('main.dashboard') }}" class="btn-primary-action">Go to Dashboard</a>
+  </div>
+</div>
+{% endblock %}

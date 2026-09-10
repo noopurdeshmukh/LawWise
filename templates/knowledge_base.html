@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}Legal Knowledge Base — LawWise{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">Legal Knowledge Base</h1>
+  <p class="page-subtitle">Documents indexed for AI-powered legal research</p>
+</div>
+
+<!-- Stats Row -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="stat-card">
+      <div class="stat-val">{{ stats.total_chunks }}</div>
+      <div class="stat-desc">Indexed Chunks</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card">
+      <div class="stat-val">{{ stats.unique_documents }}</div>
+      <div class="stat-desc">Documents</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card">
+      <div class="stat-val">{{ stats.jurisdictions | length }}</div>
+      <div class="stat-desc">Jurisdictions</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card">
+      <div class="stat-val">{{ stats.doc_types | length }}</div>
+      <div class="stat-desc">Document Types</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Document Types -->
+  <div class="col-md-4">
+    <div class="card-panel">
+      <div class="panel-header"><i class="bi bi-pie-chart"></i> By Document Type</div>
+      {% if stats.doc_types %}
+        {% for dtype, count in stats.doc_types.items() %}
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span>{{ dtype }}</span>
+          <div class="d-flex align-items-center gap-2">
+            <div class="mini-bar">
+              <div class="mini-bar-fill" style="width: {{ [(count / stats.total_chunks * 100), 100] | min | int }}%;"></div>
+            </div>
+            <span class="badge-count">{{ count }}</span>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state-sm"><i class="bi bi-inbox"></i> <span>No documents indexed.</span></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Jurisdictions -->
+  <div class="col-md-4">
+    <div class="card-panel">
+      <div class="panel-header"><i class="bi bi-globe"></i> By Jurisdiction</div>
+      {% if stats.jurisdictions %}
+        {% for jur, count in stats.jurisdictions.items() %}
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span>{{ jur }}</span>
+          <span class="badge-count">{{ count }}</span>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state-sm"><i class="bi bi-globe2"></i> <span>No jurisdictions indexed.</span></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="col-md-4">
+    <div class="card-panel">
+      <div class="panel-header"><i class="bi bi-lightning"></i> Actions</div>
+      <a href="{{ url_for('main.upload') }}" class="action-btn-full mb-2">
+        <i class="bi bi-cloud-upload"></i> Upload Document
+      </a>
+      <a href="{{ url_for('main.ask') }}" class="action-btn-full mb-2">
+        <i class="bi bi-chat-dots"></i> Ask a Question
+      </a>
+      <a href="{{ url_for('main.contract_review') }}" class="action-btn-full">
+        <i class="bi bi-search"></i> Review Contract
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Indexed Documents -->
+<div class="card-panel mt-4">
+  <div class="panel-header"><i class="bi bi-archive"></i> Indexed Documents</div>
+  {% if documents %}
+  <div class="doc-table-wrapper">
+    <table class="doc-table">
+      <thead>
+        <tr><th>Document</th><th>Type</th><th>Jurisdiction</th><th>Chunks</th><th>Status</th><th>Uploaded</th></tr>
+      </thead>
+      <tbody>
+        {% for doc in documents %}
+        <tr>
+          <td>
+            <a href="{{ url_for('main.document_view', doc_id=doc.id) }}" class="doc-link">
+              {% if doc.file_type == 'pdf' %}<i class="bi bi-file-earmark-pdf text-danger"></i>
+              {% elif doc.file_type == 'docx' %}<i class="bi bi-file-earmark-word text-primary"></i>
+              {% else %}<i class="bi bi-file-earmark-text text-secondary"></i>{% endif %}
+              {{ doc.original_filename }}
+            </a>
+          </td>
+          <td><span class="badge-type">{{ doc.doc_type }}</span></td>
+          <td>{{ doc.jurisdiction }}</td>
+          <td>{{ doc.chunk_count }}</td>
+          <td><span class="status-badge status-{{ doc.status }}">{{ doc.status }}</span></td>
+          <td>{{ doc.upload_date.strftime('%b %d, %Y') }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon"><i class="bi bi-cloud-upload"></i></div>
+    <h5>Knowledge Base is Empty</h5>
+    <p>Upload legal documents to build your knowledge base.<br>Supported formats: PDF, DOCX, TXT</p>
+    <a href="{{ url_for('main.upload') }}" class="btn-primary-action">Upload Documents</a>
+  </div>
+  {% endif %}
+</div>
+
+<!-- How to Add Documents -->
+<div class="card-panel mt-4">
+  <div class="panel-header"><i class="bi bi-info-circle"></i> How to Build Your Knowledge Base</div>
+  <div class="row g-3 mt-1">
+    <div class="col-md-3 text-center">
+      <div class="step-num">1</div>
+      <div class="step-text">Upload a PDF, DOCX, or TXT document</div>
+    </div>
+    <div class="col-md-3 text-center">
+      <div class="step-num">2</div>
+      <div class="step-text">LawWise extracts and chunks the text</div>
+    </div>
+    <div class="col-md-3 text-center">
+      <div class="step-num">3</div>
+      <div class="step-text">Embeddings are generated and stored in FAISS</div>
+    </div>
+    <div class="col-md-3 text-center">
+      <div class="step-num">4</div>
+      <div class="step-text">Ask questions — get source-backed answers</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

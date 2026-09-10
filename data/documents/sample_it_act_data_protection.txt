@@ -1,0 +1,116 @@
+INFORMATION TECHNOLOGY ACT, 2000 AND DIGITAL PERSONAL DATA PROTECTION ACT, 2023
+OVERVIEW OF DATA PROTECTION AND PRIVACY REQUIREMENTS IN INDIA
+Source: Ministry of Electronics and Information Technology (MeitY), Government of India
+Jurisdiction: India
+Document Type: Act / Statute / Regulation
+Year: 2000 / 2023
+
+================================================================
+PART 1: INFORMATION TECHNOLOGY ACT, 2000 — RELEVANT PROVISIONS
+================================================================
+
+OVERVIEW
+The Information Technology Act, 2000 (IT Act) is the primary law dealing with cybercrime and electronic commerce in India. Section 43A and the IT (Reasonable Security Practices and Procedures and Sensitive Personal Data or Information) Rules, 2011 contain specific requirements for data protection.
+
+SECTION 43A — COMPENSATION FOR FAILURE TO PROTECT DATA:
+Where a body corporate, possessing, dealing or handling any sensitive personal data or information in a computer resource which it owns, controls or operates, is negligent in implementing and maintaining reasonable security practices and procedures and thereby causes wrongful loss or wrongful gain to any person, such body corporate shall be liable to pay damages by way of compensation to the person so affected.
+
+SENSITIVE PERSONAL DATA OR INFORMATION (SPDI Rules, 2011):
+Under Rule 3 of the SPDI Rules, "sensitive personal data or information" includes:
+- Password
+- Financial information such as Bank account, credit card, debit card details
+- Physical, physiological and mental health condition
+- Sexual orientation
+- Medical records and history
+- Biometric information
+- Any detail relating to the above clauses as provided to body corporate for providing service
+- Any of the information received under above clauses by body corporate for processing, stored or processed under lawful contract or otherwise
+
+NOTICE AND CONSENT REQUIREMENTS (SPDI Rules):
+- A body corporate must obtain written consent from the provider of sensitive personal data before collecting it
+- Providers must be informed about the purpose of collection, recipients of information, agency collecting and retaining information, and the name and address of the agency
+- The data subject must be given an option not to provide data and to review/correct information
+- Sensitive personal data shall not be collected unless necessary for a lawful purpose
+
+REASONABLE SECURITY PRACTICES:
+Organizations must implement comprehensive documented information security program and information security policies containing managerial, technical, operational and physical security control measures consistent with the information assets being protected.
+
+================================================================
+PART 2: DIGITAL PERSONAL DATA PROTECTION ACT, 2023 (DPDPA)
+================================================================
+
+OVERVIEW
+The Digital Personal Data Protection Act, 2023 (DPDPA) was enacted on August 11, 2023 and represents India's comprehensive personal data protection law. It applies to the processing of digital personal data within India and to processing outside India if such processing is in connection with offering goods or services to data principals within India.
+
+KEY DEFINITIONS:
+- Data Principal: The individual to whom the personal data relates
+- Data Fiduciary: Any person who alone or in conjunction with other persons determines the purpose and means of processing of personal data
+- Consent Manager: A person registered with the Data Protection Board
+- Personal Data: Any data about an individual who is identifiable by or in relation to such data
+
+OBLIGATIONS OF DATA FIDUCIARIES:
+Data Fiduciaries must:
+1. Process personal data only for a lawful purpose with consent of Data Principal or for certain legitimate uses
+2. Give a clear and plain-language notice to the Data Principal before or at the time of collection
+3. Process only such personal data that is necessary for the specified purpose (data minimisation)
+4. Implement appropriate technical and organisational measures to ensure reasonable security safeguards
+5. Erase personal data upon withdrawal of consent or upon the purpose being no longer served
+6. Establish an effective grievance redressal mechanism
+7. Not engage a Data Processor to process personal data except under a valid contract
+
+RIGHTS OF DATA PRINCIPALS:
+1. Right to Access Information about personal data
+2. Right to Correction and Erasure of personal data
+3. Right to Grievance Redressal
+4. Right to Nominate another individual to exercise rights in event of death or incapacity
+
+CONSENT REQUIREMENTS:
+- Consent must be free, specific, informed, unconditional and unambiguous
+- Consent must be given through a clear affirmative action
+- Consent must be for a specified purpose
+- The Data Principal may withdraw consent at any time
+- Processing based on consent must be as limited as possible for specified purpose only
+
+SIGNIFICANT DATA FIDUCIARIES:
+The Central Government may notify certain Data Fiduciaries as Significant Data Fiduciaries based on:
+- Volume and sensitivity of personal data processed
+- Risk to rights of Data Principals
+- Potential impact on sovereignty and integrity of India
+- Risk to electoral democracy
+- Security of the State
+- Public order
+
+PENALTIES (Section 33):
+- Breach of obligations regarding children: Up to Rs. 200 crore
+- Failure to implement reasonable security safeguards: Up to Rs. 250 crore
+- Breach of obligations of Data Fiduciary: Up to Rs. 50 crore
+- Breach of additional obligations of Significant Data Fiduciary: Up to Rs. 150 crore
+
+NOTE: The DPDPA 2023 rules are yet to be fully notified as of 2024. Organizations should monitor MeitY notifications for implementation timelines and specific compliance requirements.
+
+================================================================
+PART 3: COMPLIANCE CHECKLIST FOR PRIVACY POLICIES
+================================================================
+
+A privacy policy in India should address:
+
+1. Identity and contact details of the data fiduciary
+2. Categories of personal data collected
+3. Purpose of collection and processing
+4. Basis for processing (consent / legitimate use)
+5. Data retention period
+6. Data sharing — third parties, processors
+7. International transfers (if any)
+8. Rights of data principals and how to exercise them
+9. Grievance Officer details (mandatory under IT Act Rules)
+10. Security measures in place
+11. Policy on cookies and tracking technologies
+12. Date of last update
+
+A Grievance Officer must be appointed and their name and contact details must be published.
+
+================================================================
+DISCLAIMER
+================================================================
+
+This document provides a summary of IT Act, SPDI Rules, and DPDPA 2023 provisions for educational purposes. Data protection law in India is evolving and DPDPA Rules are pending notification. Organizations must consult qualified legal counsel for compliance advice.

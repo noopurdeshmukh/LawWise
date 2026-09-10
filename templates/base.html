@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}LawWise — AI Legal Aid{% endblock %}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- Sidebar -->
+<nav id="sidebar" class="sidebar d-flex flex-column">
+  <div class="sidebar-brand">
+    <a href="{{ url_for('main.index') }}" class="brand-link">
+      <span class="brand-icon">⚖</span>
+      <span class="brand-text">LAW<span class="brand-accent">WISE</span></span>
+    </a>
+  </div>
+  <div class="sidebar-tagline">Understand the law. Know your rights.</div>
+
+  <ul class="sidebar-nav">
+    <li class="nav-item">
+      <a href="{{ url_for('main.dashboard') }}" class="nav-link {% if request.endpoint == 'main.dashboard' %}active{% endif %}">
+        <i class="bi bi-house-door"></i> Dashboard
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="{{ url_for('main.ask') }}" class="nav-link {% if request.endpoint == 'main.ask' or request.endpoint == 'main.ask_post' %}active{% endif %}">
+        <i class="bi bi-chat-dots"></i> Ask LawWise
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="{{ url_for('main.upload') }}" class="nav-link {% if request.endpoint == 'main.upload' %}active{% endif %}">
+        <i class="bi bi-file-earmark-text"></i> My Documents
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="{{ url_for('main.contract_review') }}" class="nav-link {% if request.endpoint == 'main.contract_review' %}active{% endif %}">
+        <i class="bi bi-search"></i> Contract Review
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="{{ url_for('main.compliance') }}" class="nav-link {% if request.endpoint == 'main.compliance' %}active{% endif %}">
+        <i class="bi bi-check2-circle"></i> Compliance
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="{{ url_for('main.cases') }}" class="nav-link {% if request.endpoint == 'main.cases' %}active{% endif %}">
+        <i class="bi bi-balance-scale"></i> Case Research
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="{{ url_for('main.knowledge_base') }}" class="nav-link {% if request.endpoint == 'main.knowledge_base' %}active{% endif %}">
+        <i class="bi bi-book"></i> Knowledge Base
+      </a>
+    </li>
+    <li class="nav-item mt-auto">
+      <a href="{{ url_for('main.settings') }}" class="nav-link {% if request.endpoint == 'main.settings' %}active{% endif %}">
+        <i class="bi bi-gear"></i> Settings
+      </a>
+    </li>
+  </ul>
+
+  <div class="sidebar-disclaimer">
+    <i class="bi bi-info-circle"></i>
+    General information only.<br>Not legal advice.
+  </div>
+</nav>
+
+<!-- Mobile top bar -->
+<div class="mobile-topbar" id="mobileTopbar">
+  <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle menu">
+    <i class="bi bi-list"></i>
+  </button>
+  <span class="mobile-brand">⚖ LAW<span class="brand-accent">WISE</span></span>
+</div>
+
+<!-- Sidebar overlay for mobile -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Main content -->
+<main class="main-content">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show mx-3 mt-3" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

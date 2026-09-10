@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Settings — LawWise{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">Settings</h1>
+  <p class="page-subtitle">Configuration and system information</p>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-6">
+    <!-- AI Configuration -->
+    <div class="card-panel mb-4">
+      <div class="panel-header"><i class="bi bi-cpu"></i> AI Configuration</div>
+      <table class="info-table">
+        <tr>
+          <td>Groq API</td>
+          <td>
+            {% if groq_configured %}
+            <span class="status-badge status-indexed">✓ Configured</span>
+            {% else %}
+            <span class="status-badge status-error">✗ Not configured</span>
+            {% endif %}
+          </td>
+        </tr>
+        <tr><td>Model</td><td><code>{{ model }}</code></td></tr>
+      </table>
+      {% if not groq_configured %}
+      <div class="alert alert-warning mt-3 mb-0">
+        <i class="bi bi-exclamation-triangle"></i>
+        <strong>Groq API key not configured.</strong><br>
+        Add <code>GROQ_API_KEY=your_key</code> to your <code>.env</code> file and restart the server.
+        Get a free API key at <a href="https://console.groq.com" target="_blank">console.groq.com</a>.
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Knowledge Base -->
+    <div class="card-panel">
+      <div class="panel-header"><i class="bi bi-database"></i> Knowledge Base</div>
+      <table class="info-table">
+        <tr><td>Total Chunks</td><td>{{ stats.total_chunks }}</td></tr>
+        <tr><td>Documents</td><td>{{ stats.unique_documents }}</td></tr>
+        <tr><td>Embedding Model</td><td><code>all-MiniLM-L6-v2</code></td></tr>
+        <tr><td>Vector Store</td><td>FAISS (Local)</td></tr>
+      </table>
+      <a href="{{ url_for('main.upload') }}" class="action-btn-full mt-3">
+        <i class="bi bi-cloud-upload"></i> Upload Documents
+      </a>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <!-- System Info -->
+    <div class="card-panel mb-4">
+      <div class="panel-header"><i class="bi bi-info-circle"></i> System Information</div>
+      <table class="info-table">
+        <tr><td>Application</td><td>LawWise</td></tr>
+        <tr><td>Version</td><td>1.0.0</td></tr>
+        <tr><td>Backend</td><td>Flask (Python)</td></tr>
+        <tr><td>AI Provider</td><td>Groq</td></tr>
+        <tr><td>RAG</td><td>FAISS + Sentence Transformers</td></tr>
+        <tr><td>Database</td><td>SQLite</td></tr>
+        <tr><td>Jurisdiction</td><td>India (Primary)</td></tr>
+      </table>
+    </div>
+
+    <!-- Security Notice -->
+    <div class="card-panel">
+      <div class="panel-header"><i class="bi bi-shield-check"></i> Security & Privacy</div>
+      <ul class="tips-list">
+        <li>API keys are loaded from <code>.env</code> only — never exposed to the frontend</li>
+        <li>Uploaded documents are stored locally</li>
+        <li>File type and size validation is enforced on upload</li>
+        <li>Session-based chat history</li>
+        <li>No external data sharing without your knowledge</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Environment Setup Guide -->
+<div class="card-panel mt-4">
+  <div class="panel-header"><i class="bi bi-terminal"></i> Setup Guide</div>
+  <div class="code-block">
+    <div class="code-label">1. Create .env file</div>
+    <pre>GROQ_API_KEY=your_groq_api_key_here
+GROQ_MODEL=llama-3.3-70b-versatile
+SECRET_KEY=your_flask_secret_key
+FLASK_ENV=development</pre>
+    <div class="code-label mt-3">2. Install dependencies</div>
+    <pre>pip install -r requirements.txt</pre>
+    <div class="code-label mt-3">3. Run the application</div>
+    <pre>python app.py</pre>
+    <div class="code-label mt-3">4. Get Groq API key</div>
+    <pre>Visit https://console.groq.com → Create API Key (free tier available)</pre>
+  </div>
+</div>
+{% endblock %}

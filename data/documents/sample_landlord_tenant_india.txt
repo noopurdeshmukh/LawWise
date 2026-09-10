@@ -1,0 +1,122 @@
+LANDLORD-TENANT LAWS IN INDIA — OVERVIEW
+Rent Control Acts and Tenancy Laws
+Source: Legal Research Summary | Jurisdiction: India
+Document Type: Legal Overview
+Year: 2023
+
+================================================================
+OVERVIEW
+================================================================
+
+Tenancy laws in India are governed by a combination of:
+1. State-specific Rent Control Acts
+2. The Transfer of Property Act, 1882 (central legislation)
+3. The Model Tenancy Act, 2021 (central model, adopted by states)
+4. State-specific Rent Control Acts (in most states)
+
+The law of landlord-tenant relationship in India is primarily state-governed. Different states have different Rent Control Acts with varying provisions.
+
+================================================================
+THE TRANSFER OF PROPERTY ACT, 1882 — LEASE PROVISIONS
+================================================================
+
+Definition of Lease (Section 105):
+A lease of immovable property is a transfer of a right to enjoy such property, made for a certain time, express or implied, or in perpetuity, in consideration of a price paid or promised, or of money, a share of crops, service or any other thing of value, to be rendered periodically or on specified occasions to the transferor by the transferee, who accepts the transfer on such terms.
+
+Duration and Termination:
+- In the absence of a written contract or local law, a month-to-month tenancy can be terminated by 15 days' notice
+- Year-to-year tenancy can be terminated by 6 months' notice (Section 106)
+- For manufacturing or agricultural purposes: 6 months' notice required
+- For all other purposes (residential, commercial): 15 days' notice
+
+Rights of Lessee (Tenant) (Section 108):
+Unless there is a contract or local usage to the contrary, the lessor shall be deemed to have contracted with the lessee:
+(a) That the lessee may hold the property undisturbed during the period of the lease
+(b) To put the lessee in possession of the property
+(c) For repair obligations (parties may contract otherwise)
+
+Duties of Lessee (Section 108):
+The lessee is bound:
+(a) to disclose to the lessor any fact as to the nature or extent of the interest which the lessee is about to take
+(b) to pay the premium or rent at the proper time
+(c) to keep, and on the termination of the lease to restore, the property in as good a condition as it was in at the time when he was put in possession
+(d) to give notice of any suit by a third party for the property
+(e) not to use or permit to use the property for a purpose other than that for which it was leased
+(f) not to erect permanent structures without consent of lessor
+(g) to give notice of material injury to property
+(h) not to sublet or assign without consent, unless otherwise agreed
+
+================================================================
+MODEL TENANCY ACT, 2021
+================================================================
+
+The Model Tenancy Act, 2021 was introduced to reform the rental housing market in India.
+
+Key Features:
+1. Separate Rent Authority, Rent Court, and Rent Tribunal in each state/UT
+2. Written rental agreement mandatory
+3. Security deposit capped at 2 months' rent for residential; 6 months' for commercial
+4. Landlord cannot increase rent during the period of tenancy agreement except as per contract
+5. Landlord must give advance notice before entry into tenanted premises
+6. Sub-letting only with prior written consent of landlord
+7. Tenant cannot make structural changes without written consent
+
+Notice Periods under Model Tenancy Act:
+- For termination by either party: Notice as per agreement, not less than 2 months for residential
+- Eviction for non-payment of rent: 2 months' notice after 2 months' rent arrears
+- Eviction on expiry of tenancy: 1 month's notice
+
+Eviction Grounds:
+The landlord may seek eviction of the tenant if:
+(a) Tenant fails to pay rent for 2 consecutive months
+(b) Tenant has sub-let the property without consent
+(c) Tenant has made structural changes without permission
+(d) Tenant uses premises for purpose not specified in agreement
+(e) Tenancy period has expired and landlord requires premises for personal use
+(f) Landlord requires premises for repair/renovation
+
+Tenant's Rights:
+- Right to receive rent receipt for every payment
+- Right to essential services (cannot be cut off by landlord to force vacating)
+- Right not to be dispossessed without due process and notice
+- Right to challenge eviction before Rent Authority/Court
+
+================================================================
+KEY ISSUES IN LANDLORD-TENANT DISPUTES
+================================================================
+
+Security Deposit:
+Security deposits are amounts paid by the tenant at inception of tenancy. These must be returned upon vacation. Unreasonable deductions from security deposits may be challenged. Under the Model Tenancy Act, residential deposit is capped at 2 months' rent.
+
+Eviction Without Due Process:
+A landlord cannot forcibly evict a tenant without following due legal process:
+- Proper notice as per agreement or law
+- Filing application before Rent Authority/Civil Court if tenant does not vacate
+- Obtaining court order before physical eviction
+
+Lock-in Period:
+Many agreements contain lock-in periods during which neither party may terminate. Courts generally enforce lock-in clauses unless:
+- The clause is unconscionable
+- The other party has materially breached
+
+Rent Increase:
+Rent can be increased only as per the terms of the agreement or as permitted under state Rent Control Acts. Unilateral rent increases without notice may not be enforceable.
+
+================================================================
+IMPORTANT NOTE ON STATE LAWS
+================================================================
+
+The following states have their own specific Rent Control Acts which may provide additional protections:
+- Maharashtra: Maharashtra Rent Control Act, 1999
+- Delhi: Delhi Rent Control Act, 1958
+- Karnataka: Karnataka Rent Act, 2001
+- Tamil Nadu: Tamil Nadu Buildings (Lease and Rent Control) Act, 1960
+- West Bengal: West Bengal Premises Tenancy Act, 1997
+
+Tenants and landlords in these states should refer to the specific state legislation for applicable provisions.
+
+================================================================
+DISCLAIMER
+================================================================
+
+This overview is for educational purposes only. Tenancy law is primarily state-governed in India, and provisions vary significantly. Consult a qualified lawyer familiar with the applicable state laws for specific advice.

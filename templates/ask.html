@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+{% block title %}Ask LawWise — Legal Assistant{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">Ask LawWise</h1>
+  <p class="page-subtitle">Get source-backed answers to your legal questions</p>
+</div>
+
+<div class="row g-4">
+  <!-- Chat Panel -->
+  <div class="col-lg-8">
+    <div class="chat-container">
+      <!-- Messages -->
+      <div class="chat-messages" id="chatMessages">
+        {% if not history %}
+        <div class="chat-welcome">
+          <div class="welcome-icon">⚖</div>
+          <h4>LawWise Legal Assistant</h4>
+          <p>Ask me about Indian law, legal concepts, your rights, contract terms, or upload a document for analysis.</p>
+          <div class="suggestion-chips">
+            <button class="chip" onclick="insertQuery('What does indemnity mean in a contract?')">What does indemnity mean?</button>
+            <button class="chip" onclick="insertQuery('What is the difference between bail and anticipatory bail?')">Bail vs anticipatory bail?</button>
+            <button class="chip" onclick="insertQuery('What are my rights as a tenant in India?')">Tenant rights in India</button>
+            <button class="chip" onclick="insertQuery('What does Section 138 of the Negotiable Instruments Act say?')">Section 138 NI Act</button>
+          </div>
+        </div>
+        {% endif %}
+
+        {% for msg in history %}
+          {% if msg.role == 'user' %}
+          <div class="message message-user">
+            <div class="message-bubble user-bubble">{{ msg.content }}</div>
+            <div class="message-meta">You · {{ msg.timestamp.strftime('%H:%M') }}</div>
+          </div>
+          {% else %}
+          <div class="message message-assistant">
+            <div class="message-avatar"><span>⚖</span></div>
+            <div class="message-body">
+              <div class="message-bubble assistant-bubble">{{ msg.content | safe }}</div>
+              <div class="message-meta">LawWise · {{ msg.timestamp.strftime('%H:%M') }}{% if msg.agent_used %} · <span class="agent-badge">{{ msg.agent_used.replace('_', ' ').title() }}</span>{% endif %}</div>
+            </div>
+          </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      <!-- Input -->
+      <div class="chat-input-area">
+        <div class="d-flex gap-2 mb-2">
+          <select class="form-select form-select-sm" id="jurisdictionSelect" style="max-width:160px;">
+            <option value="India" selected>🇮🇳 India</option>
+            <option value="Other">Other</option>
+          </select>
+          <button class="btn btn-sm btn-outline-secondary ms-auto" id="clearChatBtn" title="Clear conversation">
+            <i class="bi bi-trash"></i> Clear
+          </button>
+        </div>
+        <div class="input-row">
+          <textarea class="chat-textarea" id="queryInput" placeholder="Ask a legal question... (e.g. What does indemnity mean? What are my consumer rights?)" rows="2"></textarea>
+          <button class="send-btn" id="sendBtn">
+            <i class="bi bi-send-fill"></i>
+          </button>
+        </div>
+        <div class="input-hint">Press Enter to send · Shift+Enter for new line</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar Panel -->
+  <div class="col-lg-4">
+    <!-- Agent Activity -->
+    <div class="card-panel mb-3" id="agentActivity" style="display:none;">
+      <div class="panel-header"><i class="bi bi-cpu"></i> LawWise AI Processing</div>
+      <div id="agentSteps"></div>
+    </div>
+
+    <!-- Sources -->
+    <div class="card-panel mb-3" id="sourcesPanel" style="display:none;">
+      <div class="panel-header"><i class="bi bi-journals"></i> Sources Used</div>
+      <div id="sourcesList"></div>
+    </div>
+
+    <!-- Tips -->
+    <div class="card-panel">
+      <div class="panel-header"><i class="bi bi-lightbulb"></i> Tips</div>
+      <ul class="tips-list">
+        <li>Upload legal documents to the <a href="{{ url_for('main.upload') }}">Knowledge Base</a> for better answers</li>
+        <li>Be specific about your jurisdiction or situation</li>
+        <li>For contract review, use the <a href="{{ url_for('main.contract_review') }}">Contract Review</a> tool</li>
+        <li>Always verify with a qualified lawyer for important matters</li>
+      </ul>
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="disclaimer-card mt-3">
+      <i class="bi bi-info-circle"></i>
+      {{ disclaimer }}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const chatMessages = document.getElementById('chatMessages');
+const queryInput = document.getElementById('queryInput');
+const sendBtn = document.getElementById('sendBtn');
+const jurisdictionSelect = document.getElementById('jurisdictionSelect');
+const agentActivity = document.getElementById('agentActivity');
+const agentSteps = document.getElementById('agentSteps');
+const sourcesPanel = document.getElementById('sourcesPanel');
+const sourcesList = document.getElementById('sourcesList');
+const clearChatBtn = document.getElementById('clearChatBtn');
+
+function insertQuery(text) {
+  queryInput.value = text;
+  queryInput.focus();
+}
+
+function scrollToBottom() {
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function showAgentSteps(steps) {
+  if (!steps || steps.length === 0) return;
+  agentActivity.style.display = 'block';
+  agentSteps.innerHTML = steps.map(s =>
+    `<div class="agent-step done"><i class="bi bi-check-circle-fill"></i> ${s.step}</div>`
+  ).join('');
+}
+
+function showSources(sources) {
+  if (!sources || sources.length === 0) {
+    sourcesPanel.style.display = 'none';
+    return;
+  }
+  sourcesPanel.style.display = 'block';
+  sourcesList.innerHTML = sources.map(s => `
+    <div class="source-card">
+      <div class="source-doc"><i class="bi bi-file-earmark-text"></i> ${escHtml(s.document)}</div>
+      ${s.section ? `<div class="source-detail">Section: ${escHtml(s.section)}</div>` : ''}
+      ${s.page ? `<div class="source-detail">Page: ${escHtml(String(s.page))}</div>` : ''}
+      <div class="source-type">${escHtml(s.source_type || 'Legal Document')} · ${escHtml(s.jurisdiction || 'India')}</div>
+      ${s.excerpt ? `<div class="source-excerpt">"${escHtml(s.excerpt.substring(0,200))}${s.excerpt.length>200?'...':''}"</div>` : ''}
+    </div>
+  `).join('');
+}
+
+function addUserMessage(text) {
+  const div = document.createElement('div');
+  div.className = 'message message-user';
+  div.innerHTML = `<div class="message-bubble user-bubble">${escHtml(text)}</div><div class="message-meta">You · just now</div>`;
+  chatMessages.appendChild(div);
+  scrollToBottom();
+}
+
+function addAssistantMessage(text, agentUsed) {
+  const div = document.createElement('div');
+  div.className = 'message message-assistant';
+  const formattedText = formatMarkdown(text);
+  div.innerHTML = `
+    <div class="message-avatar"><span>⚖</span></div>
+    <div class="message-body">
+      <div class="message-bubble assistant-bubble">${formattedText}</div>
+      <div class="message-meta">LawWise · just now${agentUsed ? ` · <span class="agent-badge">${escHtml(agentUsed.replace(/_/g,' '))}</span>` : ''}</div>
+    </div>`;
+  chatMessages.appendChild(div);
+  scrollToBottom();
+}
+
+function addThinkingMessage() {
+  const div = document.createElement('div');
+  div.className = 'message message-assistant thinking-msg';
+  div.id = 'thinkingMsg';
+  div.innerHTML = `
+    <div class="message-avatar"><span>⚖</span></div>
+    <div class="message-body">
+      <div class="message-bubble assistant-bubble thinking-bubble">
+        <div class="thinking-dots"><span></span><span></span><span></span></div>
+        <span class="thinking-text">Analyzing with LawWise AI...</span>
+      </div>
+    </div>`;
+  chatMessages.appendChild(div);
+  scrollToBottom();
+  return div;
+}
+
+async function sendMessage() {
+  const query = queryInput.value.trim();
+  if (!query) return;
+  const jurisdiction = jurisdictionSelect.value;
+
+  queryInput.value = '';
+  sendBtn.disabled = true;
+  agentActivity.style.display = 'none';
+  sourcesPanel.style.display = 'none';
+
+  addUserMessage(query);
+  const thinking = addThinkingMessage();
+
+  try {
+    const resp = await fetch('/ask', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({query, jurisdiction})
+    });
+    const data = await resp.json();
+    thinking.remove();
+
+    if (data.error) {
+      addAssistantMessage('❌ ' + data.error, null);
+    } else {
+      addAssistantMessage(data.answer, data.agent_used);
+      showAgentSteps(data.agent_steps);
+      showSources(data.sources);
+    }
+  } catch(e) {
+    thinking.remove();
+    addAssistantMessage('❌ Network error. Please check your connection and try again.', null);
+  } finally {
+    sendBtn.disabled = false;
+    queryInput.focus();
+  }
+}
+
+sendBtn.addEventListener('click', sendMessage);
+queryInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+
+clearChatBtn.addEventListener('click', async () => {
+  if (!confirm('Clear conversation history?')) return;
+  await fetch('/ask/history/clear', {method:'POST'});
+  location.reload();
+});
+
+scrollToBottom();
+</script>
+{% endblock %}

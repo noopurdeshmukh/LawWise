@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+{% block title %}My Documents — LawWise{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-start flex-wrap gap-2">
+  <div>
+    <h1 class="page-title">My Documents</h1>
+    <p class="page-subtitle">Upload and manage legal documents for AI analysis</p>
+  </div>
+</div>
+
+<!-- Upload Card -->
+<div class="card-panel mb-4">
+  <div class="panel-header"><i class="bi bi-cloud-upload"></i> Upload Document</div>
+  <div class="upload-zone" id="uploadZone">
+    <div class="upload-icon"><i class="bi bi-file-earmark-arrow-up"></i></div>
+    <div class="upload-text">Drag & drop or click to select a file</div>
+    <div class="upload-hint">PDF · DOCX · TXT &nbsp;|&nbsp; Max {{ config.MAX_UPLOAD_SIZE_MB if config else 10 }} MB</div>
+    <input type="file" id="fileInput" accept=".pdf,.docx,.txt" class="d-none">
+    <button class="btn-upload mt-2" onclick="document.getElementById('fileInput').click()">Choose File</button>
+  </div>
+
+  <div id="filePreview" class="mt-3 d-none">
+    <div class="selected-file d-flex align-items-center gap-2">
+      <i class="bi bi-file-earmark-check text-success fs-5"></i>
+      <span id="selectedFilename"></span>
+      <button class="btn btn-sm btn-link text-danger ms-auto" onclick="clearFile()">Remove</button>
+    </div>
+    <div class="row g-3 mt-1">
+      <div class="col-md-4">
+        <label class="form-label small text-muted">Jurisdiction</label>
+        <select class="form-select form-select-sm" id="jurisdictionSelect">
+          <option value="India" selected>🇮🇳 India</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label small text-muted">Document Type</label>
+        <select class="form-select form-select-sm" id="docTypeSelect">
+          <option value="General">General</option>
+          <option value="Act / Statute">Act / Statute</option>
+          <option value="Judgment">Judgment</option>
+          <option value="Contract">Contract</option>
+          <option value="Regulation">Regulation</option>
+          <option value="Policy">Policy</option>
+          <option value="Notice">Notice</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="col-md-4 d-flex align-items-end">
+        <button class="btn btn-primary w-100" id="uploadBtn" onclick="uploadFile()">
+          <i class="bi bi-cloud-upload"></i> Upload & Index
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="uploadProgress" class="mt-3 d-none">
+    <div class="progress-bar-wrapper">
+      <div class="progress-bar-fill" id="progressFill"></div>
+    </div>
+    <div class="upload-status" id="uploadStatus">Uploading and indexing...</div>
+  </div>
+</div>
+
+<!-- Privacy Notice -->
+<div class="privacy-notice mb-4">
+  <i class="bi bi-lock"></i>
+  <strong>Privacy Notice:</strong> Documents are stored locally on this server. Avoid uploading documents containing unnecessary personal or sensitive information. Document text is used only for AI analysis.
+</div>
+
+<!-- Documents List -->
+<div class="card-panel">
+  <div class="panel-header d-flex justify-content-between align-items-center">
+    <span><i class="bi bi-archive"></i> Uploaded Documents ({{ documents | length }})</span>
+  </div>
+
+  {% if documents %}
+  <div class="doc-table-wrapper">
+    <table class="doc-table">
+      <thead>
+        <tr>
+          <th>Document</th>
+          <th>Type</th>
+          <th>Jurisdiction</th>
+          <th>Uploaded</th>
+          <th>Status</th>
+          <th>Chunks</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for doc in documents %}
+        <tr>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              {% if doc.file_type == 'pdf' %}<i class="bi bi-file-earmark-pdf text-danger"></i>
+              {% elif doc.file_type == 'docx' %}<i class="bi bi-file-earmark-word text-primary"></i>
+              {% else %}<i class="bi bi-file-earmark-text text-secondary"></i>{% endif %}
+              <span class="doc-filename">{{ doc.original_filename }}</span>
+            </div>
+          </td>
+          <td><span class="badge-type">{{ doc.doc_type }}</span></td>
+          <td>{{ doc.jurisdiction }}</td>
+          <td>{{ doc.upload_date.strftime('%b %d, %Y') }}</td>
+          <td><span class="status-badge status-{{ doc.status }}">{{ doc.status }}</span></td>
+          <td>{{ doc.chunk_count }}</td>
+          <td>
+            <div class="d-flex gap-1">
+              <a href="{{ url_for('main.document_view', doc_id=doc.id) }}" class="btn-icon-sm" title="View"><i class="bi bi-eye"></i></a>
+              <button class="btn-icon-sm btn-danger-sm" onclick="deleteDoc({{ doc.id }}, '{{ doc.original_filename }}')" title="Delete"><i class="bi bi-trash"></i></button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon"><i class="bi bi-file-earmark-plus"></i></div>
+    <h5>No documents yet</h5>
+    <p>Upload a PDF, DOCX, or TXT document to get started.<br>LawWise will index it for AI-powered analysis.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const fileInput = document.getElementById('fileInput');
+const filePreview = document.getElementById('filePreview');
+const selectedFilename = document.getElementById('selectedFilename');
+const uploadZone = document.getElementById('uploadZone');
+const uploadProgress = document.getElementById('uploadProgress');
+const progressFill = document.getElementById('progressFill');
+const uploadStatus = document.getElementById('uploadStatus');
+
+fileInput.addEventListener('change', e => {
+  if (e.target.files[0]) showFile(e.target.files[0]);
+});
+
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.classList.remove('drag-over');
+  if (e.dataTransfer.files[0]) { fileInput.files = e.dataTransfer.files; showFile(e.dataTransfer.files[0]); }
+});
+
+function showFile(file) {
+  selectedFilename.textContent = `${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+  filePreview.classList.remove('d-none');
+}
+
+function clearFile() {
+  fileInput.value = '';
+  filePreview.classList.add('d-none');
+}
+
+async function uploadFile() {
+  const file = fileInput.files[0];
+  if (!file) { alert('Please select a file.'); return; }
+
+  const jurisdiction = document.getElementById('jurisdictionSelect').value;
+  const docType = document.getElementById('docTypeSelect').value;
+
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('jurisdiction', jurisdiction);
+  formData.append('doc_type', docType);
+
+  uploadProgress.classList.remove('d-none');
+  document.getElementById('uploadBtn').disabled = true;
+  progressFill.style.width = '30%';
+  uploadStatus.textContent = 'Uploading...';
+
+  try {
+    progressFill.style.width = '60%';
+    const resp = await fetch('/upload', { method: 'POST', body: formData });
+    progressFill.style.width = '90%';
+    const data = await resp.json();
+
+    if (data.error) {
+      uploadStatus.textContent = '❌ ' + data.error;
+      uploadStatus.style.color = '#e53e3e';
+    } else {
+      progressFill.style.width = '100%';
+      uploadStatus.textContent = data.message || data.warning || '✓ Upload successful!';
+      if (data.warning) uploadStatus.style.color = '#d97706';
+      setTimeout(() => location.reload(), 1500);
+    }
+  } catch(e) {
+    uploadStatus.textContent = '❌ Upload failed. Check your connection.';
+    uploadStatus.style.color = '#e53e3e';
+  } finally {
+    document.getElementById('uploadBtn').disabled = false;
+  }
+}
+
+async function deleteDoc(docId, filename) {
+  if (!confirm(`Delete "${filename}" and remove from knowledge base?`)) return;
+  const resp = await fetch(`/document/${docId}/delete`, {method:'POST'});
+  const data = await resp.json();
+  if (data.success) location.reload();
+}
+</script>
+{% endblock %}

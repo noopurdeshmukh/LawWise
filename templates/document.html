@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block title %}Document — {{ doc.original_filename }} — LawWise{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-start flex-wrap gap-2">
+  <div>
+    <a href="{{ url_for('main.upload') }}" class="back-link"><i class="bi bi-arrow-left"></i> My Documents</a>
+    <h1 class="page-title mt-1">{{ doc.original_filename }}</h1>
+    <div class="d-flex gap-2 flex-wrap mt-1">
+      <span class="badge-type">{{ doc.doc_type }}</span>
+      <span class="badge-type">{{ doc.jurisdiction }}</span>
+      <span class="status-badge status-{{ doc.status }}">{{ doc.status }}</span>
+      <span class="text-muted small">Uploaded {{ doc.upload_date.strftime('%B %d, %Y') }}</span>
+    </div>
+  </div>
+  <div class="d-flex gap-2 flex-wrap">
+    <button class="btn-action" id="analyzeBtn" onclick="analyzeDocument()"><i class="bi bi-cpu"></i> Analyze</button>
+    <a href="{{ url_for('main.contract_review') }}?doc_id={{ doc.id }}" class="btn-action"><i class="bi bi-search"></i> Review Contract</a>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Document Info -->
+  <div class="col-md-4">
+    <div class="card-panel mb-3">
+      <div class="panel-header"><i class="bi bi-info-circle"></i> Document Info</div>
+      <table class="info-table">
+        <tr><td>File</td><td>{{ doc.original_filename }}</td></tr>
+        <tr><td>Type</td><td>{{ doc.file_type.upper() }}</td></tr>
+        <tr><td>Category</td><td>{{ doc.doc_type }}</td></tr>
+        <tr><td>Jurisdiction</td><td>{{ doc.jurisdiction }}</td></tr>
+        <tr><td>Status</td><td><span class="status-badge status-{{ doc.status }}">{{ doc.status }}</span></td></tr>
+        <tr><td>Chunks</td><td>{{ doc.chunk_count }}</td></tr>
+        <tr><td>Size</td><td>{{ (doc.file_size / 1024) | round(1) }} KB</td></tr>
+        <tr><td>Uploaded</td><td>{{ doc.upload_date.strftime('%Y-%m-%d') }}</td></tr>
+      </table>
+    </div>
+
+    <!-- Previous Analyses -->
+    {% if analyses %}
+    <div class="card-panel">
+      <div class="panel-header"><i class="bi bi-clock-history"></i> Analysis History</div>
+      {% for a in analyses %}
+      <div class="analysis-item">
+        <div class="analysis-type">{{ a.analysis_type.replace('_', ' ').title() }}</div>
+        <div class="analysis-date text-muted small">{{ a.created_at.strftime('%b %d, %H:%M') }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Analysis Panel -->
+  <div class="col-md-8">
+    <div class="card-panel" id="analysisPanel">
+      <div class="panel-header"><i class="bi bi-cpu"></i> AI Analysis</div>
+      <div class="analysis-placeholder">
+        <div class="placeholder-icon"><i class="bi bi-play-circle"></i></div>
+        <p>Click <strong>Analyze</strong> to run the Document Analyzer agent on this document.</p>
+        <button class="btn-action" onclick="analyzeDocument()">Run Analysis</button>
+      </div>
+      <div id="analysisResult" class="d-none"></div>
+      <div id="analysisLoading" class="d-none">
+        <div class="loading-steps">
+          <div class="agent-step done"><i class="bi bi-check-circle-fill"></i> Loading document</div>
+          <div class="agent-step active"><i class="bi bi-arrow-repeat spin"></i> Analyzing with LawWise AI...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function analyzeDocument() {
+  document.querySelector('.analysis-placeholder').style.display = 'none';
+  document.getElementById('analysisLoading').classList.remove('d-none');
+  document.getElementById('analysisResult').classList.add('d-none');
+
+  try {
+    const resp = await fetch('/analyze-document', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({document_id: {{ doc.id }}})
+    });
+    const data = await resp.json();
+    document.getElementById('analysisLoading').classList.add('d-none');
+
+    if (data.error) {
+      document.getElementById('analysisResult').innerHTML = `<div class="alert alert-danger">${escHtml(data.error)}</div>`;
+    } else if (data.raw_analysis) {
+      document.getElementById('analysisResult').innerHTML = `<div class="analysis-text">${formatMarkdown(data.raw_analysis)}</div>`;
+    } else {
+      document.getElementById('analysisResult').innerHTML = renderDocumentAnalysis(data);
+    }
+    document.getElementById('analysisResult').classList.remove('d-none');
+  } catch(e) {
+    document.getElementById('analysisLoading').classList.add('d-none');
+    document.getElementById('analysisResult').innerHTML = `<div class="alert alert-danger">Analysis failed. Please try again.</div>`;
+    document.getElementById('analysisResult').classList.remove('d-none');
+  }
+}
+
+function renderDocumentAnalysis(data) {
+  let html = '';
+
+  if (data.document_type) {
+    html += `<div class="analysis-header"><span class="doc-type-badge">${escHtml(data.document_type)}</span></div>`;
+  }
+
+  if (data.summary) {
+    html += `<div class="analysis-section"><h5>Summary</h5><p>${escHtml(data.summary)}</p></div>`;
+  }
+
+  if (data.parties && data.parties.length) {
+    html += `<div class="analysis-section"><h5>Parties</h5><ul>`;
+    data.parties.forEach(p => { html += `<li><strong>${escHtml(p.role || '')}:</strong> ${escHtml(p.name || '')}</li>`; });
+    html += '</ul></div>';
+  }
+
+  if (data.important_clauses && data.important_clauses.length) {
+    html += `<div class="analysis-section"><h5>Important Clauses</h5>`;
+    data.important_clauses.forEach(c => {
+      const lvl = c.attention_level || 'low';
+      html += `<div class="clause-card clause-${lvl}">
+        <div class="clause-header">
+          <span class="risk-indicator risk-${lvl}">${lvl === 'high' ? '🔴' : lvl === 'medium' ? '🟠' : '🟢'} ${escHtml(c.title || '')}</span>
+          <span class="clause-category">${escHtml(c.category || '')}</span>
+        </div>
+        <div class="clause-text">"${escHtml(c.text || '')}"</div>
+        <div class="clause-explain">${escHtml(c.explanation || '')}</div>
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  if (data.potential_risks && data.potential_risks.length) {
+    html += `<div class="analysis-section"><h5>⚠️ Potential Risks</h5>`;
+    data.potential_risks.forEach(r => {
+      html += `<div class="risk-item"><strong>${escHtml(r.risk || '')}</strong><p>${escHtml(r.explanation || '')}</p></div>`;
+    });
+    html += '</div>';
+  }
+
+  if (data.action_items && data.action_items.length) {
+    html += `<div class="analysis-section"><h5>Action Items</h5><ul>`;
+    data.action_items.forEach(a => { html += `<li>${escHtml(a)}</li>`; });
+    html += '</ul></div>';
+  }
+
+  if (data.disclaimer) {
+    html += `<div class="disclaimer-card mt-3"><i class="bi bi-info-circle"></i> ${escHtml(data.disclaimer)}</div>`;
+  }
+
+  return html || '<p class="text-muted">Analysis complete. No structured data returned.</p>';
+}
+</script>
+{% endblock %}

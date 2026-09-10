@@ -1,0 +1,106 @@
+CONSUMER PROTECTION ACT, 2019 — KEY PROVISIONS
+Source: Ministry of Consumer Affairs, Food and Public Distribution, Government of India
+Jurisdiction: India
+Document Type: Act / Statute
+Year: 2019
+
+================================================================
+OVERVIEW
+================================================================
+
+The Consumer Protection Act, 2019 (CPA 2019) replaced the Consumer Protection Act, 1986 and came into force on July 20, 2020. It aims to provide for better protection of consumer interests and to establish authorities for timely and effective administration and settlement of consumer disputes.
+
+================================================================
+DEFINITIONS (Section 2)
+================================================================
+
+Consumer (Section 2(7)):
+"Consumer" means any person who:
+(i) buys any goods for a consideration which has been paid or promised or partly paid and partly promised, or under any system of deferred payment and includes any user of such goods other than the person who buys such goods for consideration paid or promised, but does not include a person who obtains such goods for resale or for any commercial purpose; or
+(ii) hires or avails of any service for a consideration which has been paid or promised or partly paid and partly promised, or under any system of deferred payment and includes any beneficiary of such service other than the person who hires or avails of the services for consideration paid or promised, but does not include a person who avails of such service for any commercial purpose.
+
+E-commerce is now included within the definition of services.
+
+Defect (Section 2(10)):
+"Defect" means any fault, imperfection or shortcoming in the quality, quantity, potency, purity or standard which is required to be maintained by or under any law for the time being in force or as is claimed by the trader in any manner whatsoever in relation to any goods or product and the expression "defective" shall be construed accordingly.
+
+Deficiency (Section 2(11)):
+"Deficiency" means any fault, imperfection, shortcoming or inadequacy in the quality, nature and manner of performance which is required to be maintained by or under any law for the time being in force or has been undertaken to be performed by a person in pursuance of a contract or otherwise in relation to any service and includes:
+(i) any act of negligence or omission or commission by such person which causes loss or injury to the consumer; and
+(ii) deliberate withholding of relevant information by such person to the consumer.
+
+Unfair Contract (Section 2(46)):
+"Unfair contract" means a contract between a manufacturer or trader or service provider on one hand, and a consumer on the other, having such terms which cause significant change in the rights of such consumer, including the following:
+(a) requiring manifestly excessive security deposits to be given by a consumer for the performance of contractual obligations
+(b) imposing any penalty on the consumer for the breach of contract thereof which is wholly disproportionate to the loss
+(c) refusing to accept early repayment of debts on payment of applicable penalty
+(d) entitling a party to the contract to terminate such contract unilaterally, without reasonable cause
+(e) permitting or has the effect of permitting one party to assign the contract to the detriment of the other party who is a consumer, without his consent
+(f) imposing on the consumer any unreasonable charge, obligation or condition which puts such consumer to disadvantage
+
+================================================================
+CONSUMER RIGHTS (Section 2(9))
+================================================================
+
+Every consumer has the following rights:
+(i) Right to be protected against marketing of goods, products or services which are hazardous to life and property
+(ii) Right to be informed about the quality, quantity, potency, purity, standard and price of goods, products or services
+(iii) Right to be assured of access to a variety of goods, products or services at competitive prices
+(iv) Right to be heard and to be assured that consumer's interests will receive due consideration at appropriate forums
+(v) Right to seek redressal against unfair trade practices or restrictive trade practices or unscrupulous exploitation
+(vi) Right to consumer awareness
+
+================================================================
+CONSUMER DISPUTES REDRESSAL COMMISSIONS
+================================================================
+
+District Consumer Disputes Redressal Commission:
+Jurisdiction for complaints where value of goods/services does not exceed Rs. 1 crore.
+
+State Consumer Disputes Redressal Commission:
+Jurisdiction for complaints where value of goods/services exceeds Rs. 1 crore but does not exceed Rs. 10 crore.
+
+National Consumer Disputes Redressal Commission:
+Jurisdiction for complaints where value of goods/services exceeds Rs. 10 crore.
+
+================================================================
+E-COMMERCE PROVISIONS
+================================================================
+
+The CPA 2019 and E-Commerce Rules, 2020 require:
+- Display of country of origin
+- Display of all mandatory details about sellers
+- Grievance redressal mechanism
+- Prohibition of unfair trade practices
+- No discrimination between consumers
+- No fake reviews
+- No display of misleading advertisements
+
+================================================================
+PRODUCT LIABILITY (Chapter VI)
+================================================================
+
+Product liability action may be brought by a complainant against:
+- Product manufacturer
+- Product service provider
+- Product seller
+
+A product manufacturer shall be liable in a product liability action if:
+(a) the product contains a manufacturing defect
+(b) the product is defective in design
+(c) there is a deficiency in warnings or instructions
+(d) the product does not conform to an express warranty
+
+================================================================
+PENALTIES
+================================================================
+
+Misleading advertisements: Penalty up to Rs. 10 lakhs for first offence; up to Rs. 50 lakhs for subsequent offences; imprisonment up to 2 years; up to 5 years for subsequent offences.
+
+Adulteration and spurious goods: Imprisonment from 6 months to life imprisonment and fine depending on severity of harm caused.
+
+================================================================
+DISCLAIMER
+================================================================
+
+This document provides a summary of selected provisions of the Consumer Protection Act, 2019 for educational purposes. It is not a complete reproduction of the Act. Consult a qualified lawyer for specific consumer law matters.
